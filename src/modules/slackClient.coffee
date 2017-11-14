@@ -11,7 +11,7 @@ class SlackClient extends EventEmitter
   @slack = null
   @mongo = null
 
-  constructor: (mongo = null, token = null) ->
+  constructor: (mongo = null, token = null, slack) ->
     @token            = process.env.SLACK_TOKEN || config.get('slack.token')
     @token            = token || @token
     @autoReconnect    = true
@@ -19,6 +19,7 @@ class SlackClient extends EventEmitter
     @users            = []
     @channels         = []
     @channelId        = process.env.CHANNEL_ID || config.get('slack.channelId')
+    @slack            = slack
 
     # parse env vars that have to be arrays
     @disabledUsers    = if process.env.DISABLED_USERS then JSON.parse "[" + process.env.DISABLED_USERS + "]" else config.get 'slack.disabledUsers'
@@ -27,23 +28,22 @@ class SlackClient extends EventEmitter
     if mongo? then @mongo = mongo
 
   connect: () ->
-    console.log 'connecting...'
-    @slack = new Slack(@token, @autoReconnect, @autoMark)
-
     # listen to Slack API events
     @slack.on 'presenceChange', @presenceChangeHandler
     @slack.on 'message', @messageHandler
-
+    
     promise = new Promise (resolve, reject) =>
       # on open, push available users to array
       @slack.on 'open', =>
         for user, attrs of @slack.users when attrs.is_bot is false
           @users.push attrs
+
+        console.log @slack.users
         resolve @slack
 
       @slack.on 'error', (error) ->
         reject error
-
+      
       @slack.login()
 
   getUsers: () ->

@@ -4,6 +4,7 @@
 should      = require 'should'
 sinon       = require 'sinon'
 config      = require 'config'
+Slack       = require '../src/vendor/client'
 SlackClient = require '../src/modules/slackClient'
 slackClient = null
 connect     = null
@@ -15,14 +16,51 @@ connect     = null
 describe 'SlackClient', ->
 
   before ->
+    slack = new Slack('tokens4feels')
+    slackLogin = sinon.stub slack, 'login', () ->
+      slack.users = 
+        { U7WRNPYDV:
+          { _client:
+            {
+              autoReconnect: true,
+              autoMark: false
+            },
+            id: 'U7WRNPYDV',
+            team_id: 'T7V3ZN16U',
+     name: 'nash.rn',
+     real_name: 'Ryan Nash',
+     profile:
+       { real_name: 'Ryan Nash',
+        display_name: '',
+        email: 'nash.rn@gmail.com',
+        team: 'T7V3ZN16U' },
+     is_bot: false,
+     presence: 'away' },
+  U7V826RPB:
+    { _client:
+      { 
+        autoReconnect: true,
+        autoMark: false
+      },
+        id: 'U7V826RPB',
+     team_id: 'T7V3ZN16U',
+     name: 'oskar',
+     real_name: 'oskar',
+     profile:
+       { bot_id: 'B7VTEFSRK',
+        real_name: 'oskar',
+        display_name: '',
+        team: 'T7V3ZN16U' },
+     is_bot: true,
+     presence: 'away' }
+        }
+      slack.emit('open')
     process.env.CHANNEL_ID = 'broadcastChannel'
-    slackClient = new SlackClient(null, 'xoxb-37819774417-QuZwoLJLCmqgwa2GIE115oSy')
-    connect     = slackClient.connect()
-
-  this.timeout 20000
+    slackClient = new SlackClient(null, 'whatever', slack)
 
   it 'should connect to the slack client', (done) ->
-    connect.then (res) ->
+    slackClient.connect().then (res) ->
+      res.should.have.property 'users'
       res.should.have.property 'autoReconnect'
       res.should.have.property 'autoMark'
       done()

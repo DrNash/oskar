@@ -19,43 +19,19 @@ describe 'SlackClient', ->
     slack = new Slack('tokens4feels')
     slackLogin = sinon.stub slack, 'login', () ->
       slack.users = 
-        { U7WRNPYDV:
-          { _client:
-            {
-              autoReconnect: true,
-              autoMark: false
-            },
-            id: 'U7WRNPYDV',
-            team_id: 'T7V3ZN16U',
-     name: 'nash.rn',
-     real_name: 'Ryan Nash',
-     profile:
-       { real_name: 'Ryan Nash',
-        display_name: '',
-        email: 'nash.rn@gmail.com',
-        team: 'T7V3ZN16U' },
-     is_bot: false,
-     presence: 'away' },
-  U7V826RPB:
-    { _client:
-      { 
-        autoReconnect: true,
-        autoMark: false
-      },
-        id: 'U7V826RPB',
-     team_id: 'T7V3ZN16U',
-     name: 'oskar',
-     real_name: 'oskar',
-     profile:
-       { bot_id: 'B7VTEFSRK',
-        real_name: 'oskar',
-        display_name: '',
-        team: 'T7V3ZN16U' },
-     is_bot: true,
-     presence: 'away' }
-        }
+        user1: 
+          id: 1
+          is_bot: false
+          name: 'Mr Mc Mr'
+          first_name: 'Mc'
+          last_name: 'Mr'
+        user2:
+          id: 2
+          is_bot: true
+          name: 'Barbar de Rarrar'
+          first_name: 'Barbar'
+          last_name: 'de Rarrar'
       slack.emit('open')
-    process.env.CHANNEL_ID = 'broadcastChannel'
     slackClient = new SlackClient(null, 'whatever', slack)
 
   it 'should connect to the slack client', (done) ->
@@ -77,9 +53,10 @@ describe 'SlackClient', ->
     disabledChannels = null
 
     before ->
-      connect.then ->
+      slackClient.connect().then ->
         users            = slackClient.getUsers()
         userIds          = slackClient.getUserIds()
+        console.log userIds
         disabledUsers    = config.get 'slack.disabledUsers'
         disabledChannels = config.get 'slack.disabledChannels'
 
@@ -91,10 +68,10 @@ describe 'SlackClient', ->
             users.indexOf(userId).should.be.equal(-1)
 
       it 'should get a user', ->
-        user = slackClient.getUser userIds[0]
+        user = slackClient.getUser 1
+        console.log user
         user.name.should.be.type 'string'
-        user.profile.first_name.should.be.type 'string'
-        user.profile.last_name.should.be.type 'string'
+        user.first_name.should.equal 'Mc'
 
     describe 'PublicMethodsFeedbackMessage', ->
 

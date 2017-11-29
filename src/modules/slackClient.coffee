@@ -38,7 +38,6 @@ class SlackClient extends EventEmitter
         for user, attrs of @slack.users when attrs.is_bot is false
           @users.push attrs
 
-        console.log @slack.users
         resolve @slack
 
       @slack.on 'error', (error) ->

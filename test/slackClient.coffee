@@ -27,11 +27,12 @@ describe 'SlackClient', ->
           last_name: 'Mr'
         user2:
           id: 2
-          is_bot: true
+          is_bot: false
           name: 'Barbar de Rarrar'
           first_name: 'Barbar'
           last_name: 'de Rarrar'
       slack.emit('open')
+    #process.env.DISABLED_USERS = "\"2\""
     slackClient = new SlackClient(null, 'whatever', slack)
 
   it 'should connect to the slack client', (done) ->
@@ -56,8 +57,7 @@ describe 'SlackClient', ->
       slackClient.connect().then ->
         users            = slackClient.getUsers()
         userIds          = slackClient.getUserIds()
-        console.log userIds
-        disabledUsers    = config.get 'slack.disabledUsers'
+        disabledUsers    = config.get 'slack.disabledUsers' #["2"]
         disabledChannels = config.get 'slack.disabledChannels'
 
     describe 'PublicMethods', ->
@@ -65,11 +65,14 @@ describe 'SlackClient', ->
       it 'should not contain IDs of disabled users', ->
         if disabledUsers.length
           disabledUsers.forEach (userId) ->
+            console.log userId
+            users.forEach (user, index) ->
+              console.log user
+              console.log index
             users.indexOf(userId).should.be.equal(-1)
 
       it 'should get a user', ->
         user = slackClient.getUser 1
-        console.log user
         user.name.should.be.type 'string'
         user.first_name.should.equal 'Mc'
 

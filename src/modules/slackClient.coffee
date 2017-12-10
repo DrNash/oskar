@@ -47,6 +47,7 @@ class SlackClient extends EventEmitter
 
   getUsers: () ->
     # ignore slackbot and disabled users
+    console.log @disabledUsers
     users = @users.filter (user) =>
       return @disabledUsers.indexOf(user.id) is -1
     return users
